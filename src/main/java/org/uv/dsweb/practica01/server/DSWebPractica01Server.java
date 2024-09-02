@@ -49,7 +49,7 @@ public class DSWebPractica01Server {
             
             while (true) {
                 Socket cliente = server.accept();
-                ClienteSocket clienteSocket = new ClienteSocket();
+                ClienteSocket clienteSocket = new ClienteSocket(cliente);
                 clienteSocket.start();
                 System.out.println("Cliente Aceptado....");
             }
