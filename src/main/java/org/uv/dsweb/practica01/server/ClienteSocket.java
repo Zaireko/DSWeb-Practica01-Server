@@ -19,99 +19,91 @@ import java.util.logging.Logger;
  * @author Asus
  */
 public class ClienteSocket extends Thread {
+
     private Socket cliente;
-    InputStreamReader isr = null;
-    BufferedReader reader = null;
-    OutputStreamWriter osw = null;
-    BufferedWriter writer = null;
-    public ClienteSocket (Socket cliente){
+    private BufferedReader reader = null;
+    private BufferedWriter writer = null;
+
+    public ClienteSocket(Socket cliente) {
+        this.cliente = cliente;
+        InputStreamReader isr = null;
+
         try {
-            this.cliente = cliente;
-            isr = new InputStreamReader(cliente.getInputStream());
+            isr = new InputStreamReader(this.cliente.getInputStream());
             reader = new BufferedReader(isr);
         } catch (IOException ex) {
             Logger.getLogger(ClienteSocket.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-//        finally {
-//            try {
-//                isr.close();
-//            } catch( IOException ex) {
-//                Logger.getLogger(ClienteSocket.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-        
-        
+        }
+
+        OutputStreamWriter osw = null;
+
         try {
             osw = new OutputStreamWriter(cliente.getOutputStream());
             writer = new BufferedWriter(osw);
         } catch (IOException ex) {
             Logger.getLogger(ClienteSocket.class.getName()).log(Level.SEVERE, null, ex);
-        } 
-//        finally {
-//            try {
-//                osw.close();
-//            } catch (IOException ex) {
-//                Logger.getLogger(ClienteSocket.class.getName()).log(Level.SEVERE, null, ex);
-//            }
-//        }
-        
-    }
-    @Override
-    public void run () {
-        while(true) {
-            try {
+        }
 
+    }
+
+    boolean correr = true;
+
+    @Override
+    public void run() {
+        while (correr) {
+            try {
                 String operacion = reader.readLine();
-                System.out.println("Operacion--> " + operacion);
-                String resultado = "";
-                
-                
+                System.out.println("Operación recibida: " + operacion);
+
                 int indexSuma = operacion.indexOf("+");
                 int indexResta = operacion.indexOf("-");
                 int indexMulti = operacion.indexOf("*");
                 int indexDivision = operacion.indexOf("/");
-                
-                if (indexSuma > 0) {
+
+                String resultado = "";
+                if (indexSuma != -1) {
                     String a = operacion.substring(0, indexSuma);
-                    String b = operacion.substring(indexSuma +1, operacion.length());
-                    
+                    String b = operacion.substring(indexSuma + 1, operacion.length());
+
                     int cVal = Integer.parseInt(a) + Integer.parseInt(b);
-                    String c = String.valueOf(cVal);
-                    resultado = "a: "+ a + " mas" + " b: " + b + " Resultado: " + c;
-                    
-                } else if (indexResta > 0) {
+                    resultado = "a: " + a + " más " + "b: " + b + " = " + cVal;
+
+                } else if (indexResta != -1) {
                     String a = operacion.substring(0, indexResta);
-                    String b = operacion.substring(indexResta +1, operacion.length());
-                    
+                    String b = operacion.substring(indexResta + 1, operacion.length());
+
                     int cVal = Integer.parseInt(a) - Integer.parseInt(b);
-                    String c = String.valueOf(cVal);
-                    resultado = "a: "+ a + " menos" + " b: " + b + " Resultado: " + c;
-                } else if (indexMulti > 0) {
+                    resultado = "a: " + a + " menos " + "b: " + b + " = " + cVal;
+
+                } else if (indexMulti != -1) {
                     String a = operacion.substring(0, indexMulti);
-                    String b = operacion.substring(indexMulti +1, operacion.length());
-                    
+                    String b = operacion.substring(indexMulti + 1, operacion.length());
+
                     int cVal = Integer.parseInt(a) * Integer.parseInt(b);
-                    String c = String.valueOf(cVal);
-                    resultado = "a: "+ a + " por" + " b: " + b + " Resultado: " + c;
-                } else if (indexDivision > 0) {
+                    resultado = "a: " + a + " por " + "b: " + b + " = " + cVal;
+
+                } else if (indexDivision != -1) {
                     String a = operacion.substring(0, indexDivision);
-                    String b = operacion.substring(indexDivision +1, operacion.length());
-                    
+                    String b = operacion.substring(indexDivision + 1, operacion.length());
+
                     int cVal = Integer.parseInt(a) / Integer.parseInt(b);
-                    String c = String.valueOf(cVal);
-                    resultado = "a: "+ a + " entre" + " b: " + b + " Resultado: " + c;
+                    resultado = "a: " + a + " entre " + "b: " + b + " = " + cVal;
                 } else {
-                    resultado = "Error . . .";
+                    resultado = "Error en la operación...";
                 }
-                
-                writer.write(resultado);
+
+                // Mostrar operación y resultado en el servidor
+                System.out.println("Resultado: " + resultado);
+
+                // Enviar el resultado al cliente
+                writer.write(resultado + "\n");
                 writer.flush();
-                
-                //System.out.println("Hola mundo...");
-                //sleep(1000);
+
             } catch (IOException ex) {
+                correr = false;
                 Logger.getLogger(ClienteSocket.class.getName()).log(Level.SEVERE, null, ex);
             }
         }
     }
+
 }
